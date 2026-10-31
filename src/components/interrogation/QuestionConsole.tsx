@@ -1,17 +1,15 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Question, AnswerEvaluation, PressureIntensity, AnswerVerdict } from '@/lib/types';
+import { Question, AnswerEvaluation, PressureIntensity } from '@/lib/types';
 import { sound } from '@/lib/audio';
 import { 
   Clock, 
   Send, 
   CheckCircle2, 
   XCircle, 
-  HelpCircle, 
   AlertTriangle, 
   ArrowRight, 
-  Sparkles,
   BookOpen
 } from 'lucide-react';
 
@@ -36,7 +34,6 @@ export function QuestionConsole({
   isEvaluating,
   isLastQuestion
 }: QuestionConsoleProps) {
-  // Timer durations based on intensity
   const initialTime = intensity === 'brutal' ? 20 : intensity === 'gentle' ? 45 : 30;
   const [timeLeft, setTimeLeft] = useState<number>(initialTime);
   const [selectedOption, setSelectedOption] = useState<string>('');
@@ -45,10 +42,8 @@ export function QuestionConsole({
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [isGlitching, setIsGlitching] = useState<boolean>(false);
 
-  // Timer interval ref
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Reset state when new question arrives
   useEffect(() => {
     setSelectedOption('');
     setShortAnswerText('');
@@ -77,7 +72,6 @@ export function QuestionConsole({
     };
   }, [question.id, initialTime]);
 
-  // Handle timeout auto-submission
   useEffect(() => {
     if (timeLeft === 0 && !isSubmitted && !isEvaluating) {
       handleAnswerSubmit('Timed out / No answer provided');
@@ -90,9 +84,9 @@ export function QuestionConsole({
 
     const answerToSubmit = forcedAnswer !== undefined 
       ? forcedAnswer 
-      : (question.type === 'short_answer' ? shortAnswerText.trim() : selectedOption);
+      : (shortAnswerText.trim() || selectedOption);
 
-    if (!answerToSubmit && question.type === 'short_answer') return;
+    if (!answerToSubmit) return;
 
     sound.playTick();
     setIsSubmitted(true);
@@ -116,79 +110,55 @@ export function QuestionConsole({
   const getDifficultyBadge = () => {
     switch (question.difficulty) {
       case 'expert':
-        return 'border-rose-500/50 bg-rose-950/40 text-rose-300';
+        return 'text-rose-700 bg-rose-50 border-rose-200';
       case 'applied':
-        return 'border-violet-500/50 bg-violet-950/40 text-violet-300';
+        return 'text-purple-700 bg-purple-50 border-purple-200';
       case 'foundation':
-        return 'border-emerald-500/50 bg-emerald-950/40 text-emerald-300';
+        return 'text-emerald-700 bg-emerald-50 border-emerald-200';
     }
   };
 
-  // Keyboard shortcut listener for A, B, C, D in MCQ
-  useEffect(() => {
-    if (isSubmitted || isEvaluating || question.type !== 'mcq') return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const key = e.key.toUpperCase();
-      const map: Record<string, number> = { A: 0, B: 1, C: 2, D: 3 };
-      if (map[key] !== undefined && question.options[map[key]]) {
-        sound.playTick();
-        setSelectedOption(question.options[map[key]]);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isSubmitted, isEvaluating, question]);
-
   return (
-    <div className={`w-full glass-panel-glow rounded-2xl p-5 sm:p-7 space-y-6 transition-all duration-300 border ${
-      isGlitching ? 'animate-glitch border-rose-500' : 'border-white/10'
+    <div className={`editorial-card rounded-3xl p-7 sm:p-9 space-y-6 transition-all duration-300 ${
+      isGlitching ? 'ring-2 ring-rose-500' : ''
     }`}>
-      {/* Top Question HUD Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-mono font-bold text-slate-300 uppercase tracking-wider">
-            Inquiry {questionNumber.toString().padStart(2, '0')} / {totalQuestions.toString().padStart(2, '0')}
+      {/* Question Header HUD */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-black/[0.06]">
+        <div className="flex items-center gap-2 font-typewriter text-xs text-neutral-500">
+          <span className="font-bold text-neutral-900">
+            {questionNumber.toString().padStart(2, '0')} / {totalQuestions.toString().padStart(2, '0')}
           </span>
-          <span className="text-slate-600 font-mono">•</span>
-          <span className="text-xs font-mono text-cyan-400 max-w-[200px] truncate">
+          <span>•</span>
+          <span className="text-neutral-700 max-w-[220px] truncate">
             {question.topic}
           </span>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          {/* Difficulty Badge */}
-          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase border tracking-wider ${getDifficultyBadge()}`}>
+        <div className="flex items-center gap-3">
+          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-typewriter font-medium uppercase border ${getDifficultyBadge()}`}>
             {question.difficulty}
           </span>
 
           {/* Countdown Timer */}
-          <div className={`flex items-center gap-1.5 px-3 py-1 rounded-lg border font-mono text-xs font-bold transition-colors ${
+          <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full border font-typewriter text-xs font-bold transition-colors ${
             timeLeft <= 5 
-              ? 'bg-rose-950/50 border-rose-500 text-rose-300 animate-pulse' 
-              : 'bg-black/40 border-white/10 text-slate-300'
+              ? 'bg-rose-50 border-rose-300 text-rose-600 animate-pulse' 
+              : 'bg-neutral-100 border-black/[0.06] text-neutral-700'
           }`}>
-            <Clock className={`w-3.5 h-3.5 ${timeLeft <= 5 ? 'text-rose-400 animate-spin' : 'text-slate-400'}`} />
+            <Clock className="w-3.5 h-3.5" />
             <span>{timeLeft}s</span>
           </div>
         </div>
       </div>
 
-      {/* Main Question Display */}
+      {/* Main Question Display in Serif */}
       <div className="space-y-3">
-        <div className="flex items-start gap-3">
-          <div className="w-7 h-7 rounded-lg bg-violet-600/20 border border-violet-500/40 flex items-center justify-center shrink-0 mt-0.5">
-            <span className="font-mono font-bold text-violet-300 text-xs">Q</span>
-          </div>
-          <h3 className="text-base sm:text-lg font-bold text-white leading-relaxed font-sans">
-            {question.question}
-          </h3>
-        </div>
+        <h3 className="font-editorial text-2xl sm:text-3xl font-bold text-neutral-900 leading-snug">
+          {question.question}
+        </h3>
 
-        {/* In-character prompt subtitle */}
         {question.examinerLine && (
-          <p className="text-xs font-mono italic text-slate-400 pl-10">
+          <p className="font-editorial italic text-xs sm:text-sm text-neutral-500 leading-relaxed">
             &ldquo;{question.examinerLine}&rdquo;
           </p>
         )}
@@ -202,7 +172,7 @@ export function QuestionConsole({
             <div className="space-y-3">
               <div className="grid grid-cols-1 gap-2.5">
                 {question.options.map((opt, idx) => {
-                  const label = String.fromCharCode(65 + idx); // A, B, C, D
+                  const label = String.fromCharCode(65 + idx);
                   const isSelected = selectedOption === opt;
 
                   return (
@@ -213,20 +183,20 @@ export function QuestionConsole({
                         sound.playTick();
                         setSelectedOption(opt);
                       }}
-                      className={`text-left p-3.5 rounded-xl border transition-all flex items-start gap-3 group ${
+                      className={`text-left p-4 rounded-2xl border transition-all flex items-start gap-3.5 group ${
                         isSelected
-                          ? 'bg-violet-950/50 border-violet-400 ring-1 ring-violet-400/50 text-white shadow-lg shadow-violet-500/10'
-                          : 'bg-black/40 border-white/10 hover:border-white/20 hover:bg-white/[0.04] text-slate-200'
+                          ? 'bg-neutral-900 border-neutral-900 text-white shadow-md'
+                          : 'bg-white border-black/[0.08] hover:border-black/25 text-neutral-800'
                       }`}
                     >
-                      <span className={`w-6 h-6 rounded-md border flex items-center justify-center text-xs font-mono font-bold shrink-0 transition-colors ${
+                      <span className={`w-6 h-6 rounded-md border flex items-center justify-center text-xs font-typewriter font-bold shrink-0 transition-colors ${
                         isSelected
-                          ? 'bg-violet-600 border-violet-400 text-white'
-                          : 'border-white/20 text-slate-400 group-hover:border-white/40'
+                          ? 'bg-white text-neutral-900 border-white'
+                          : 'border-black/15 text-neutral-400 group-hover:border-black/30'
                       }`}>
                         {label}
                       </span>
-                      <span className="text-sm leading-relaxed pt-0.5 font-sans">
+                      <span className="text-sm leading-relaxed font-sans pt-0.5">
                         {opt}
                       </span>
                     </button>
@@ -234,18 +204,18 @@ export function QuestionConsole({
                 })}
               </div>
 
-              {/* Text justification box for MCQ */}
-              <div className="pt-1">
-                <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 mb-1">
-                  <span>Optional: Explain your reasoning in text:</span>
+              {/* Optional Text Justification */}
+              <div className="pt-2">
+                <div className="flex items-center justify-between text-[11px] font-typewriter text-neutral-500 mb-1">
+                  <span>Or type your defense in text:</span>
                   {shortAnswerText.length > 0 && <span>{shortAnswerText.length} chars</span>}
                 </div>
                 <textarea
                   value={shortAnswerText}
                   onChange={(e) => setShortAnswerText(e.target.value)}
-                  placeholder="Type extra justification or explain your choice..."
+                  placeholder="Explain your technical reasoning in your own words..."
                   rows={2}
-                  className="w-full p-3 rounded-xl bg-black/60 border border-white/10 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 text-xs text-slate-200 placeholder-slate-500 font-mono resize-none leading-relaxed"
+                  className="w-full p-3 rounded-xl bg-white border border-black/[0.1] focus:border-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-900 text-xs text-neutral-800 placeholder-neutral-400 font-typewriter resize-none leading-relaxed"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
                       e.preventDefault();
@@ -271,10 +241,10 @@ export function QuestionConsole({
                         sound.playTick();
                         setSelectedOption(val);
                       }}
-                      className={`py-4 px-6 rounded-xl border text-center font-mono font-bold text-sm tracking-wider uppercase transition-all ${
+                      className={`py-4 px-6 rounded-2xl border text-center font-typewriter font-bold text-sm tracking-wider uppercase transition-all ${
                         isSelected
-                          ? 'bg-cyan-950/60 border-cyan-400 text-cyan-300 ring-1 ring-cyan-400/50 shadow-lg shadow-cyan-500/10'
-                          : 'bg-black/40 border-white/10 hover:border-white/20 hover:bg-white/[0.04] text-slate-300'
+                          ? 'bg-neutral-900 border-neutral-900 text-white shadow-md'
+                          : 'bg-white border-black/[0.08] hover:border-black/25 text-neutral-800'
                       }`}
                     >
                       {val}
@@ -283,13 +253,13 @@ export function QuestionConsole({
                 })}
               </div>
 
-              <div className="pt-1">
+              <div className="pt-2">
                 <textarea
                   value={shortAnswerText}
                   onChange={(e) => setShortAnswerText(e.target.value)}
                   placeholder="Optional: Defend why this statement is True or False..."
                   rows={2}
-                  className="w-full p-3 rounded-xl bg-black/60 border border-white/10 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs text-slate-200 placeholder-slate-500 font-mono resize-none leading-relaxed"
+                  className="w-full p-3 rounded-xl bg-white border border-black/[0.1] focus:border-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-900 text-xs text-neutral-800 placeholder-neutral-400 font-typewriter resize-none leading-relaxed"
                 />
               </div>
             </div>
@@ -298,17 +268,17 @@ export function QuestionConsole({
           {/* Short Answer Mode (Primary Oral Exam Mode) */}
           {question.type === 'short_answer' && (
             <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs font-mono text-slate-400">
-                <span className="text-cyan-400 font-bold uppercase tracking-wider">Type Your Defense (Graded Semantically by Gemini)</span>
+              <div className="flex items-center justify-between text-xs font-typewriter text-neutral-500">
+                <span className="font-bold text-neutral-800 uppercase">Defend Your Answer (Graded Semantically)</span>
                 <span>{shortAnswerText.length} chars</span>
               </div>
               <textarea
                 autoFocus
                 value={shortAnswerText}
                 onChange={(e) => setShortAnswerText(e.target.value)}
-                placeholder="Type your explanation and defense here. Defend your answer with specific mechanisms, definitions, and causal reasoning from the notes..."
+                placeholder="Type your explanation and defense here. Defend your answer with specific mechanisms, definitions, and causal reasoning from your notes..."
                 rows={5}
-                className="w-full p-4 rounded-xl bg-black/60 border border-violet-500/30 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/40 text-sm text-slate-100 placeholder-slate-500 font-mono transition-all resize-none leading-relaxed shadow-inner"
+                className="w-full p-4 rounded-2xl bg-white border border-black/[0.12] focus:border-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-900 text-sm text-neutral-900 placeholder-neutral-400 font-typewriter transition-all resize-none leading-relaxed"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
                     e.preventDefault();
@@ -316,34 +286,33 @@ export function QuestionConsole({
                   }
                 }}
               />
-              <p className="text-[11px] text-slate-400 font-mono flex items-center justify-between">
-                <span>Tip: Press <kbd className="px-1.5 py-0.5 rounded bg-white/10 border border-white/20">Ctrl+Enter</kbd> to submit defense immediately.</span>
+              <p className="text-[11px] text-neutral-500 font-typewriter">
+                Tip: Press <kbd className="px-1.5 py-0.5 rounded bg-neutral-100 border border-black/[0.1]">Ctrl+Enter</kbd> to submit defense immediately.
               </p>
             </div>
           )}
 
           {/* Submit Defense CTA */}
-          <button
-            type="button"
-            disabled={
-              isEvaluating || 
-              (!shortAnswerText.trim() && !selectedOption)
-            }
-            onClick={() => handleAnswerSubmit()}
-            className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-mono font-bold text-sm tracking-wider uppercase shadow-lg shadow-violet-600/20 border border-white/20 transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99]"
-          >
-            {isEvaluating ? (
-              <>
-                <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                <span>Evaluating Defense Against Notes...</span>
-              </>
-            ) : (
-              <>
-                <Send className="w-4 h-4" />
-                <span>Submit Defense</span>
-              </>
-            )}
-          </button>
+          <div className="pt-2">
+            <button
+              type="button"
+              disabled={isEvaluating || (!shortAnswerText.trim() && !selectedOption)}
+              onClick={() => handleAnswerSubmit()}
+              className="editorial-pill-dark w-full py-4 px-6 font-typewriter font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {isEvaluating ? (
+                <>
+                  <span className="w-3.5 h-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                  <span>Evaluating Defense Against Notes...</span>
+                </>
+              ) : (
+                <>
+                  <Send className="w-3.5 h-3.5" />
+                  <span>Submit Oral Defense</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       )}
 
@@ -351,68 +320,66 @@ export function QuestionConsole({
       {isSubmitted && evaluation && (
         <div className="space-y-4 pt-2">
           {/* Verdict Banner */}
-          <div className={`p-4 rounded-xl border flex items-start gap-3 ${
+          <div className={`p-5 rounded-2xl border flex items-start gap-3.5 ${
             evaluation.verdict === 'correct'
-              ? 'glass-panel-success border-emerald-500/50'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-950'
               : evaluation.verdict === 'partially_correct'
-              ? 'bg-amber-950/40 border-amber-500/50'
-              : 'glass-panel-danger border-rose-500/50'
+              ? 'bg-amber-50 border-amber-200 text-amber-950'
+              : 'bg-rose-50 border-rose-200 text-rose-950'
           }`}>
             {evaluation.verdict === 'correct' ? (
-              <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
             ) : evaluation.verdict === 'partially_correct' ? (
-              <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+              <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
             ) : (
-              <XCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+              <XCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
             )}
 
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <h4 className={`text-sm font-bold uppercase tracking-wider font-mono ${
-                  evaluation.verdict === 'correct' ? 'text-emerald-300' : evaluation.verdict === 'partially_correct' ? 'text-amber-300' : 'text-rose-300'
-                }`}>
+                <h4 className="font-editorial text-lg font-bold">
                   {evaluation.verdict === 'correct' ? 'Defense Sustained — Correct' : evaluation.verdict === 'partially_correct' ? 'Partially Sound — Incomplete Proof' : 'Defense Fractured — Incorrect'}
                 </h4>
-                <span className="text-xs font-mono text-slate-400">
+                <span className="text-xs font-typewriter text-neutral-500">
                   (Score: {evaluation.score}/100)
                 </span>
               </div>
-              <p className="text-xs text-slate-200 leading-relaxed font-sans">
+              <p className="text-xs text-neutral-700 leading-relaxed font-sans">
                 {evaluation.feedback}
               </p>
             </div>
           </div>
 
           {/* Correct Reference & Explanation */}
-          <div className="p-3.5 rounded-xl bg-black/40 border border-white/10 space-y-1.5 text-xs font-mono">
-            <div className="flex items-center gap-1.5 text-slate-400">
-              <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
-              <span className="uppercase tracking-wider font-bold">Verified Reference Solution</span>
+          <div className="p-4 rounded-2xl bg-neutral-50 border border-black/[0.06] space-y-1.5 text-xs font-typewriter">
+            <div className="flex items-center gap-1.5 text-neutral-700 font-bold uppercase">
+              <BookOpen className="w-3.5 h-3.5 text-neutral-700" />
+              <span>Verified Reference Solution</span>
             </div>
-            <p className="text-cyan-200 leading-relaxed">
+            <p className="text-neutral-900 leading-relaxed font-sans text-sm">
               {question.correctAnswer}
             </p>
-            <p className="text-slate-400 pt-1 leading-relaxed">
+            <p className="text-neutral-500 pt-1 leading-relaxed font-sans">
               {question.explanation}
             </p>
           </div>
 
-          {/* Misconception Diagnostic Card (CRITICAL for Track 1!) */}
+          {/* Misconception Diagnostic Card */}
           {evaluation.detectedMisconception && (
-            <div className="p-3.5 rounded-xl bg-rose-950/30 border border-rose-500/40 space-y-1.5 text-xs font-mono">
-              <div className="flex items-center gap-1.5 text-rose-400 font-bold uppercase tracking-wider">
+            <div className="p-4 rounded-2xl bg-rose-50/70 border border-rose-200 space-y-1 text-xs">
+              <div className="flex items-center gap-1.5 text-rose-700 font-typewriter font-bold uppercase">
                 <AlertTriangle className="w-3.5 h-3.5" />
                 <span>Misconception Detected</span>
               </div>
-              <p className="text-rose-200 leading-relaxed">
-                <strong className="text-white">Flawed Assumption:</strong> {evaluation.detectedMisconception}
+              <p className="text-rose-900 leading-relaxed font-sans">
+                <strong>Flawed Assumption:</strong> {evaluation.detectedMisconception}
               </p>
             </div>
           )}
 
           {/* Examiner Live Reaction */}
           {evaluation.examinerReaction && (
-            <div className="p-3 rounded-xl bg-violet-950/20 border border-violet-500/30 text-xs font-mono italic text-violet-300">
+            <div className="p-3.5 rounded-2xl bg-neutral-100 border border-black/[0.06] text-xs font-editorial italic text-neutral-700 text-center">
               &ldquo;{evaluation.examinerReaction}&rdquo;
             </div>
           )}
@@ -425,10 +392,10 @@ export function QuestionConsole({
                 sound.playTick();
                 onNextQuestion();
               }}
-              className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-cyan-600 via-indigo-600 to-violet-600 hover:from-cyan-500 hover:to-violet-500 text-white font-mono font-bold text-sm tracking-wider uppercase shadow-xl shadow-cyan-600/20 border border-white/20 transition-all flex items-center justify-center gap-2 group hover:scale-[1.01] active:scale-[0.99]"
+              className="editorial-pill-dark w-full py-4 px-6 font-typewriter font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2"
             >
               <span>{isLastQuestion ? 'Proceed to Final Weakness Report' : 'Next Interrogation Question'}</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>

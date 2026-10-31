@@ -12,48 +12,42 @@ interface ExaminerAvatarProps {
 }
 
 export function ExaminerAvatar({ persona, mood, speechText, pressure }: ExaminerAvatarProps) {
-  // Determine avatar glow and mood details
   const getMoodAura = () => {
     switch (mood) {
       case 'merciless':
         return {
-          glow: 'shadow-rose-500/30 border-rose-500/60 bg-rose-950/30',
-          eyeColor: '#F43F5E',
-          status: 'MERCILESS SCRUTINY',
+          eyeColor: '#E11D48',
+          status: 'Merciless Scrutiny',
           icon: AlertOctagon,
-          badgeColor: 'text-rose-400 border-rose-500/40 bg-rose-950/50'
+          badgeColor: 'text-rose-700 bg-rose-50 border-rose-200'
         };
       case 'impressed':
         return {
-          glow: 'shadow-emerald-500/30 border-emerald-500/60 bg-emerald-950/30',
-          eyeColor: '#34D399',
-          status: 'GRUDGINGLY SATISFIED',
+          eyeColor: '#059669',
+          status: 'Grudgingly Satisfied',
           icon: ThumbsUp,
-          badgeColor: 'text-emerald-400 border-emerald-500/40 bg-emerald-950/50'
+          badgeColor: 'text-emerald-700 bg-emerald-50 border-emerald-200'
         };
       case 'skeptical':
         return {
-          glow: 'shadow-amber-500/30 border-amber-500/60 bg-amber-950/30',
-          eyeColor: '#F59E0B',
-          status: 'HIGH SKEPTICISM',
+          eyeColor: '#D97706',
+          status: 'High Skepticism',
           icon: HelpCircle,
-          badgeColor: 'text-amber-400 border-amber-500/40 bg-amber-950/50'
+          badgeColor: 'text-amber-700 bg-amber-50 border-amber-200'
         };
       case 'intrigued':
         return {
-          glow: 'shadow-violet-500/30 border-violet-500/60 bg-violet-950/30',
-          eyeColor: '#8B5CF6',
-          status: 'TESTING LIMITS',
+          eyeColor: '#7C3AED',
+          status: 'Testing Limits',
           icon: Sparkles,
-          badgeColor: 'text-violet-400 border-violet-500/40 bg-violet-950/50'
+          badgeColor: 'text-purple-700 bg-purple-50 border-purple-200'
         };
       default:
         return {
-          glow: 'shadow-cyan-500/20 border-cyan-500/40 bg-cyan-950/20',
-          eyeColor: '#22D3EE',
-          status: 'ANALYTICAL BASELINE',
+          eyeColor: '#2563EB',
+          status: 'Analytical Baseline',
           icon: Bot,
-          badgeColor: 'text-cyan-400 border-cyan-500/40 bg-cyan-950/50'
+          badgeColor: 'text-neutral-700 bg-neutral-100 border-neutral-200'
         };
     }
   };
@@ -62,107 +56,75 @@ export function ExaminerAvatar({ persona, mood, speechText, pressure }: Examiner
 
   return (
     <div className="flex flex-col items-center space-y-4">
-      {/* Holographic Avatar Frame */}
+      {/* Holographic Geometric Avatar */}
       <div className="relative group">
-        {/* Pulsing Aura Ring */}
-        <div 
-          className={`absolute -inset-1.5 rounded-2xl blur-md transition-all duration-500 opacity-70 ${
-            mood === 'merciless' ? 'bg-rose-600/40' : mood === 'impressed' ? 'bg-emerald-600/40' : 'bg-violet-600/30'
-          }`} 
-        />
-
-        {/* Dynamic Holographic SVG Face */}
-        <div className={`relative w-28 h-28 sm:w-32 sm:h-32 rounded-2xl border-2 flex items-center justify-center backdrop-blur-xl shadow-2xl transition-all duration-500 overflow-hidden ${aura.glow}`}>
-          {/* Subtle grid in avatar */}
-          <div className="absolute inset-0 bg-[radial-gradient(#ffffff0a_1px,transparent_1px)] [background-size:12px_12px]" />
-
-          {/* SVG Robotic / Holographic Face */}
-          <svg viewBox="0 0 100 100" className="w-20 h-20 sm:w-24 sm:h-24 transition-transform duration-300">
-            {/* Outer Helmet / Head Geometry */}
+        <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl border border-black/[0.08] bg-white shadow-xl flex items-center justify-center p-3 relative overflow-hidden">
+          <svg viewBox="0 0 100 100" className="w-16 h-16 sm:w-20 sm:h-20 transition-transform duration-300">
+            {/* Outer Helmet Geometry */}
             <polygon
               points="20,25 50,12 80,25 88,60 75,88 25,88 12,60"
-              fill="rgba(15, 23, 42, 0.85)"
-              stroke="rgba(255, 255, 255, 0.25)"
-              strokeWidth="2"
+              fill="#F9FAFB"
+              stroke="#111827"
+              strokeWidth="2.5"
             />
+            {/* Forehead Core */}
+            <circle cx="50" cy="24" r="3.5" fill={aura.eyeColor} />
+            <line x1="50" y1="28" x2="50" y2="40" stroke="#9CA3AF" strokeWidth="1.5" />
 
-            {/* Forehead Circuit Core */}
-            <circle cx="50" cy="24" r="3.5" fill={aura.eyeColor} className="animate-pulse" />
-            <line x1="50" y1="28" x2="50" y2="40" stroke="rgba(255, 255, 255, 0.2)" strokeWidth="1.5" />
-
-            {/* Left Eye Visor */}
-            <path
-              d={
-                mood === 'merciless'
-                  ? 'M 28 46 L 44 50 L 42 54 L 27 50 Z'
-                  : mood === 'skeptical'
-                  ? 'M 28 48 L 44 48 L 42 53 L 28 53 Z'
-                  : 'M 27 48 L 43 48 L 41 54 L 27 54 Z'
-              }
+            {/* Eyes */}
+            <rect
+              x="28"
+              y="46"
+              width="15"
+              height="6"
+              rx="1.5"
               fill={aura.eyeColor}
-              filter="drop-shadow(0px 0px 3px currentColor)"
             />
-
-            {/* Right Eye Visor */}
-            <path
-              d={
-                mood === 'merciless'
-                  ? 'M 72 46 L 56 50 L 58 54 L 73 50 Z'
-                  : mood === 'skeptical'
-                  ? 'M 72 44 L 56 46 L 58 51 L 72 49 Z'
-                  : 'M 73 48 L 57 48 L 59 54 L 73 54 Z'
-              }
+            <rect
+              x="57"
+              y="46"
+              width="15"
+              height="6"
+              rx="1.5"
               fill={aura.eyeColor}
-              filter="drop-shadow(0px 0px 3px currentColor)"
             />
 
-            {/* Nose Bridge Sensors */}
-            <circle cx="50" cy="58" r="1.5" fill="rgba(255, 255, 255, 0.4)" />
-            <circle cx="50" cy="64" r="1.5" fill="rgba(255, 255, 255, 0.4)" />
-
-            {/* Mouth / Speaker Bar */}
+            {/* Mouth */}
             <rect
               x="36"
               y="74"
               width="28"
               height="3.5"
               rx="1.75"
-              fill={mood === 'merciless' ? '#F43F5E' : mood === 'impressed' ? '#34D399' : 'rgba(255, 255, 255, 0.3)'}
+              fill="#1F2937"
             />
-
-            {/* Corner Tech Accents */}
-            <circle cx="20" cy="25" r="2" fill="rgba(255, 255, 255, 0.5)" />
-            <circle cx="80" cy="25" r="2" fill="rgba(255, 255, 255, 0.5)" />
           </svg>
-
-          {/* Holographic sweep overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-transparent via-cyan-400/5 to-transparent pointer-events-none animate-pulse" />
         </div>
       </div>
 
       {/* Persona Info & Mood Badge */}
       <div className="text-center space-y-1">
-        <h3 className="text-sm font-bold text-white tracking-tight">{persona.name}</h3>
-        <p className="text-[11px] text-slate-400 font-mono">{persona.title}</p>
+        <h3 className="font-editorial text-lg font-bold text-neutral-900 leading-snug">
+          {persona.name}
+        </h3>
+        <p className="text-xs font-typewriter text-neutral-500">
+          {persona.title}
+        </p>
         
-        <div className="pt-1">
-          <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono tracking-wider border uppercase ${aura.badgeColor}`}>
+        <div className="pt-1.5">
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-typewriter border ${aura.badgeColor}`}>
             <span className="w-1.5 h-1.5 rounded-full bg-current animate-ping" />
             {aura.status}
           </span>
         </div>
       </div>
 
-      {/* Examiner Speech Bubble */}
+      {/* Examiner Speech Bubble (Editorial Quote Style) */}
       {speechText && (
-        <div className="w-full relative mt-2">
-          {/* Bubble tail */}
-          <div className="w-3 h-3 bg-[#0d111e] border-l border-t border-violet-500/30 transform rotate-45 mx-auto -mb-1.5 relative z-10" />
-          <div className="p-3.5 rounded-xl bg-[#0d111e]/90 border border-violet-500/30 shadow-xl backdrop-blur-md">
-            <p className="text-xs font-mono text-violet-200 leading-relaxed italic">
-              &ldquo;{speechText}&rdquo;
-            </p>
-          </div>
+        <div className="w-full relative mt-3 p-4 rounded-2xl bg-neutral-50 border border-black/[0.06] shadow-sm">
+          <p className="text-xs font-editorial italic text-neutral-700 leading-relaxed text-center">
+            &ldquo;{speechText}&rdquo;
+          </p>
         </div>
       )}
     </div>

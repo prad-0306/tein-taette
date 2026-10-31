@@ -51,15 +51,12 @@ export function InterrogationRoom({
   records,
   currentDifficulty
 }: InterrogationRoomProps) {
-  const correctCount = records.filter((r) => r.evaluation.verdict === 'correct').length;
-
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-6 lg:py-8">
-      {/* 3-Column Desktop Grid Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column: Examiner Avatar & Pressure (3 Cols on Desktop) */}
-        <div className="lg:col-span-3 space-y-4">
-          <div className="glass-panel-glow rounded-2xl p-5 border border-white/10">
+    <div className="w-full max-w-7xl mx-auto px-6 lg:px-12 py-8 lg:py-12">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Left Column: Examiner Profile & Pressure (3 Cols on Desktop) */}
+        <div className="lg:col-span-3 space-y-5">
+          <div className="editorial-card rounded-3xl p-6">
             <ExaminerAvatar
               persona={persona}
               mood={mood}
@@ -72,7 +69,7 @@ export function InterrogationRoom({
         </div>
 
         {/* Center Column: Question Console (6 Cols on Desktop) */}
-        <div className="lg:col-span-6 space-y-4">
+        <div className="lg:col-span-6 space-y-5">
           <QuestionConsole
             question={currentQuestion}
             questionNumber={questionNumber}
@@ -86,12 +83,12 @@ export function InterrogationRoom({
         </div>
 
         {/* Right Column: Live Telemetry & Radar (3 Cols on Desktop) */}
-        <div className="lg:col-span-3 space-y-4">
+        <div className="lg:col-span-3 space-y-5">
           <MasteryRadar
             topicMasteries={topicMasteries}
             streak={streak}
             totalAnswered={records.length}
-            totalCorrect={correctCount}
+            totalCorrect={records.filter((r) => r.evaluation.verdict === 'correct').length}
             currentDifficulty={currentDifficulty}
             records={records}
           />

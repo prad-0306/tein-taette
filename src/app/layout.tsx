@@ -20,11 +20,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className="bg-[#05060A] text-slate-100 antialiased selection:bg-violet-600 selection:text-white min-h-screen relative overflow-x-hidden">
-        <div className="ambient-grid fixed inset-0 pointer-events-none opacity-40 z-0" />
-        <div className="ambient-glow-top" />
-        <div className="ambient-glow-bottom" />
+    <html lang="en">
+      <body className="bg-[#FAF9F6] text-neutral-900 antialiased selection:bg-rose-500 selection:text-white min-h-screen relative overflow-x-hidden">
+        {/* Vibrant Gradient Mesh Background */}
+        <div className="editorial-mesh" />
+
+        {/* App Content */}
         <div className="relative z-10 flex flex-col min-h-screen">
           {children}
         </div>
